@@ -2,6 +2,7 @@ import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
 import { z } from "zod";
 import superjson from "superjson";
+import { prisma } from "../../../db/client";
 
 export const appRouter = trpc
   .router()
@@ -16,6 +17,11 @@ export const appRouter = trpc
       return {
         greeting: `hello ${input?.text ?? "world"}`,
       };
+    },
+  })
+  .query("getAllComments", {
+    async resolve() {
+      return await prisma.comment.findMany();
     },
   });
 

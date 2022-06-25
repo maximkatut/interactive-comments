@@ -3,11 +3,12 @@ import Head from "next/head";
 import { trpc } from "../utils/trpc";
 
 const Home: NextPage = () => {
-  const hello = trpc.useQuery(["hello", { text: "client" }]);
-  if (!hello.data) {
+  const comments = trpc.useQuery(["getAllComments"]);
+  if (!comments.data) {
     return <div>Loading...</div>;
   }
 
+  console.log(comments.data);
   return (
     <div>
       <Head>
@@ -20,7 +21,11 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <div className="bg-red-200">{hello.data.greeting}</div>
+        <div className="bg-red-200">
+          {comments.data.map((comment) => {
+            return comment.comment;
+          })}
+        </div>
       </main>
 
       <footer></footer>
