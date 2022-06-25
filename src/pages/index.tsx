@@ -1,8 +1,13 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { prisma } from "../db/client";
+import { trpc } from "../utils/trpc";
 
-const Home: NextPage = ({ comments }: any) => {
+const Home: NextPage = () => {
+  const hello = trpc.useQuery(["hello", { text: "client" }]);
+  if (!hello.data) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <Head>
@@ -15,7 +20,7 @@ const Home: NextPage = ({ comments }: any) => {
       </Head>
 
       <main>
-        <div className="bg-red-200">{comments}</div>
+        <div className="bg-red-200">{hello.data.greeting}</div>
       </main>
 
       <footer></footer>
@@ -24,12 +29,3 @@ const Home: NextPage = ({ comments }: any) => {
 };
 
 export default Home;
-
-export const getServerSideProps = async () => {
-  const comments = await prisma.comment.findMany();
-  return {
-    props: {
-      comments: JSON.stringify(comments),
-    },
-  };
-};
