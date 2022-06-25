@@ -1,7 +1,8 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import { prisma } from "../db/client";
 
-const Home: NextPage = () => {
+const Home: NextPage = ({ comments }: any) => {
   return (
     <div>
       <Head>
@@ -14,7 +15,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <div className="bg-red-200">Helloo</div>
+        <div className="bg-red-200">{comments}</div>
       </main>
 
       <footer></footer>
@@ -23,3 +24,12 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+export const getServerSideProps = async () => {
+  const comments = await prisma.comment.findMany();
+  return {
+    props: {
+      comments: JSON.stringify(comments),
+    },
+  };
+};
