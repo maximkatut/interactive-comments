@@ -1,14 +1,13 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { trpc } from "../utils/trpc";
+import { trpc } from "utils/trpc";
 
 const Home: NextPage = () => {
   const comments = trpc.useQuery(["getAllComments"]);
+
   if (!comments.data) {
     return <div>Loading...</div>;
   }
-
-  console.log(comments.data);
   return (
     <div>
       <Head>
