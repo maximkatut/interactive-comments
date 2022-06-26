@@ -17,13 +17,14 @@ model Comment {
   createdAt DateTime  @default(now())
   endsAt    DateTime?
   comment   String    @db.VarChar(5000)
-  userId    String
   rating    Int
-  User      User      @relation(fields: [userId], references: [id])
+  userId    String
+  userName  String
+  user      User      @relation(fields: [userId, userName], references: [id, name])
 }
 
 model User {
   id       String    @id @default(cuid())
   name     String
-  Comments Comment[]
+  comments Comment[]
 }

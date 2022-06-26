@@ -1,13 +1,25 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useRef } from "react";
 import { trpc } from "utils/trpc";
 
 const Home: NextPage = () => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const comments = trpc.useQuery(["comments.get-all"]);
+  const user = trpc.useQuery(["user.get"]);
+  const client = trpc.useContext();
+  const { mutate, isError, isLoading, error } = trpc.useMutation("comments.create", {
+    onSuccess: () => {
+      client.invalidateQueries(["comments.get-all"]);
+      if (!inputRef.current) return;
+      inputRef.current.value = "";
+    },
+  });
 
   if (!comments.data) {
     return <div>Loading...</div>;
   }
+
   return (
     <div>
       <Head>
@@ -19,12 +31,31 @@ const Home: NextPage = () => {
         <link rel="manifest" href="/site.webmanifest" />
       </Head>
 
-      <main>
-        <div className="bg-red-200">
-          {comments.data.map((comment) => {
-            return comment.comment;
+      <main className="bg-blue-100 flex flex-col p-10">
+        <ul className="mb-10">
+          {comments.data.map((item, index) => {
+            return <li key={index}>- {item.comment}</li>;
           })}
-        </div>
+        </ul>
+        <form
+          onSubmit={(e: any) => {
+            e.preventDefault();
+            if (user.data) {
+              mutate({
+                comment: inputRef.current ? inputRef.current.value : "",
+                rating: 0,
+                userId: user.data.id,
+                userName: user.data.name,
+              });
+            }
+          }}
+        >
+          <input disabled={isLoading} ref={inputRef} type="text" className="p-1" />
+          {isError && <p>{error.data?.code}</p>}
+          <button disabled={isLoading} className="ml-2 border-2 border-zinc-700 p-1" type="submit">
+            Send
+          </button>
+        </form>
       </main>
 
       <footer></footer>
