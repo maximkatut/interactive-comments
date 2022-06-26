@@ -1,11 +1,12 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { trpc } from "utils/trpc";
 
 const Home: NextPage = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const comments = trpc.useQuery(["comments.get-all"]);
+  const repliedComments = trpc.useQuery(["replied-comments.get-all"]);
   const user = trpc.useQuery(["user.get"]);
   const client = trpc.useContext();
   const { mutate, isError, isLoading, error } = trpc.useMutation("comments.create", {
@@ -16,7 +17,7 @@ const Home: NextPage = () => {
     },
   });
 
-  if (!comments.data) {
+  if (!comments.data || !repliedComments.data) {
     return <div>Loading...</div>;
   }
 
@@ -33,8 +34,22 @@ const Home: NextPage = () => {
 
       <main className="bg-blue-100 flex flex-col p-10">
         <ul className="mb-10">
-          {comments.data.map((item, index) => {
-            return <li key={index}>- {item.comment}</li>;
+          {comments.data.map((comment) => {
+            const replies = repliedComments.data.map((repliedComment) => {
+              if (repliedComment.commentId === comment.id) {
+                return (
+                  <li className="ml-5" key={repliedComment.id}>
+                    -- {repliedComment.body}
+                  </li>
+                );
+              }
+            });
+            return (
+              <Fragment key={comment.id}>
+                <li>- {comment.body}</li>
+                {replies}
+              </Fragment>
+            );
           })}
         </ul>
         <form
@@ -42,8 +57,7 @@ const Home: NextPage = () => {
             e.preventDefault();
             if (user.data) {
               mutate({
-                comment: inputRef.current ? inputRef.current.value : "",
-                rating: 0,
+                body: inputRef.current ? inputRef.current.value : "",
                 userId: user.data.id,
                 userName: user.data.name,
               });
