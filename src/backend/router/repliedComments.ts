@@ -14,6 +14,7 @@ export const repliedCommentsRouter = trpc
       body: z.string().min(5),
       userId: z.string(),
       userName: z.string(),
+      userAvatar: z.string(),
       commentId: z.string(),
     }),
     async resolve({ input }) {
@@ -22,6 +23,7 @@ export const repliedCommentsRouter = trpc
           body: input.body,
           userId: input.userId,
           userName: input.userName,
+          userAvatar: input.userAvatar,
           commentId: input.commentId,
         },
       });

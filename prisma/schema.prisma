@@ -20,26 +20,29 @@ model Comment {
   rating         Int              @default(0)
   userId         String
   userName       String
-  user           User             @relation(fields: [userId, userName], references: [id, name])
+  userAvatar     String
+  user           User             @relation(fields: [userId, userName, userAvatar], references: [id, name, avatar])
   RepliedComment RepliedComment[]
 }
 
 model RepliedComment {
-  id        String    @id @default(cuid())
-  createdAt DateTime  @default(now())
-  endsAt    DateTime?
-  body      String    @db.VarChar(5000)
-  rating    Int       @default(0)
-  userId    String
-  userName  String
-  user      User      @relation(fields: [userId, userName], references: [id, name])
-  Comment   Comment?  @relation(fields: [commentId], references: [id])
-  commentId String?
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  endsAt     DateTime?
+  body       String    @db.VarChar(5000)
+  rating     Int       @default(0)
+  userId     String
+  userName   String
+  userAvatar String
+  user       User      @relation(fields: [userId, userName, userAvatar], references: [id, name, avatar])
+  Comment    Comment?  @relation(fields: [commentId], references: [id])
+  commentId  String?
 }
 
 model User {
   id             String           @id @default(cuid())
   name           String
+  avatar         String
   comments       Comment[]
   RepliedComment RepliedComment[]
 }

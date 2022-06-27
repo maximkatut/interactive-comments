@@ -10,6 +10,7 @@ interface CommentCardProps {
     rating: number;
     createdAt: Date;
     userName: string;
+    userAvatar: string;
   };
 }
 
@@ -18,7 +19,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
     <li
       className={`
       flex
-      w-full h-[170px]
+      w-full
       p-6 my-3
       rounded-lg
       bg-white
@@ -33,7 +34,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
         <div className="flex justify-between items-center pb-3">
           <div className="flex items-center">
             <span>
-              <Image src={"/img/avatars/image-amyrobson.png"} alt="avatar" width={32} height={32} />
+              <Image src={comment.userAvatar} alt="avatar" width={32} height={32} />
             </span>
             <span className="text-[rgb(50,65,82)] font-bold ml-4">{comment.userName}</span>
             <span className="ml-4">{JSON.stringify(comment.createdAt)}</span>

@@ -58,6 +58,7 @@ const Home: NextPage = () => {
                 body: inputRef.current ? inputRef.current.value : "",
                 userId: user.data.id,
                 userName: user.data.name,
+                userAvatar: user.data.avatar,
               });
             }
           }}
