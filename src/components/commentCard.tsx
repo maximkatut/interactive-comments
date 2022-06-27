@@ -1,5 +1,7 @@
 import Image from "next/image";
-import { FC } from "react";
+import { FC, useEffect, useRef, useState } from "react";
+import { trpc } from "utils/trpc";
+import Button from "./button";
 import OptionsButton from "./optionsButton";
 import RateButton from "./rateButton";
 
@@ -18,6 +20,38 @@ interface CommentCardProps {
 }
 
 const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [body, setBody] = useState<string>("akljkfbykauhfsolis");
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const client = trpc.useContext();
+  const { mutate } = trpc.useMutation("comments.edit", {
+    onSuccess: async () => {
+      await client.invalidateQueries(["comments.get-all"]);
+      setIsEditMode(false);
+    },
+  });
+  const deleteComment = trpc.useMutation("comments.delete", {
+    onSuccess: () => {
+      client.invalidateQueries(["comments.get-all"]);
+    },
+  });
+
+  const handleButtonClick = () => {
+    mutate({
+      body,
+      id: comment.id,
+    });
+  };
+  const handleReplyClick = () => {};
+
+  const handleEditButtonClick = () => {
+    setIsEditMode(true);
+  };
+
+  const handleDeleteButtonClick = () => {
+    deleteComment.mutate({ id: comment.id });
+  };
+
   return (
     <li
       className={`
@@ -43,10 +77,30 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
             <span className="ml-4">{JSON.stringify(comment.createdAt)}</span>
           </div>
           <div className="font-bold">
-            <OptionsButton userId={comment.userId} authUserId={userId} />
+            <OptionsButton
+              userId={comment.userId}
+              authUserId={userId}
+              onEditClick={handleEditButtonClick}
+              onDeleteClick={handleDeleteButtonClick}
+            />
           </div>
         </div>
-        <p className="">{comment.body}</p>
+        {isEditMode ? (
+          <>
+            <textarea
+              onChange={(e) => {
+                setBody(e.target.value);
+              }}
+              className=" py-2 mb-2 px-5 border-[1px] rounded-lg border-[rgb(50,65,82)]"
+              defaultValue={comment.body}
+              ref={textAreaRef}
+              rows={4}
+            />
+            <Button onClick={handleButtonClick}>UPDATE</Button>
+          </>
+        ) : (
+          <p className="">{comment.body}</p>
+        )}
       </div>
     </li>
   );
