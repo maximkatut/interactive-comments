@@ -1,3 +1,4 @@
+import CommentCard from "components/commentCard";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { Fragment, useRef } from "react";
@@ -7,6 +8,7 @@ const Home: NextPage = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const comments = trpc.useQuery(["comments.get-all"]);
   const repliedComments = trpc.useQuery(["replied-comments.get-all"]);
+  //todo query replied comments by original comment id
   const user = trpc.useQuery(["user.get"]);
   const client = trpc.useContext();
   const { mutate, isError, isLoading, error } = trpc.useMutation("comments.create", {
@@ -32,21 +34,17 @@ const Home: NextPage = () => {
         <link rel="manifest" href="/site.webmanifest" />
       </Head>
 
-      <main className="bg-blue-100 flex flex-col p-10">
-        <ul className="mb-10">
+      <main className="flex flex-col p-12">
+        <ul className="mb-10 w-[730px] flex flex-col mx-auto items-center">
           {comments.data.map((comment) => {
             const replies = repliedComments.data.map((repliedComment) => {
               if (repliedComment.commentId === comment.id) {
-                return (
-                  <li className="ml-5" key={repliedComment.id}>
-                    -- {repliedComment.body}
-                  </li>
-                );
+                return <CommentCard key={repliedComment.id} comment={repliedComment} reply />;
               }
             });
             return (
               <Fragment key={comment.id}>
-                <li>- {comment.body}</li>
+                <CommentCard comment={comment} />
                 {replies}
               </Fragment>
             );
