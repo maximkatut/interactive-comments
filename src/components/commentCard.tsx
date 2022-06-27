@@ -1,20 +1,23 @@
 import Image from "next/image";
 import { FC } from "react";
+import OptionsButton from "./optionsButton";
 import RateButton from "./rateButton";
 
 interface CommentCardProps {
   reply?: boolean;
+  userId?: string;
   comment: {
     id: string;
     body: string;
     rating: number;
     createdAt: Date;
     userName: string;
+    userId: string;
     userAvatar: string;
   };
 }
 
-const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
+const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
   return (
     <li
       className={`
@@ -40,12 +43,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
             <span className="ml-4">{JSON.stringify(comment.createdAt)}</span>
           </div>
           <div className="font-bold">
-            <span className="text-[rgb(237,100,104)] ">
-              <button>Delete</button>
-            </span>
-            <span className="ml-4 text-[rgb(84,87,182)]">
-              <button>Reply</button>
-            </span>
+            <OptionsButton userId={comment.userId} authUserId={userId} />
           </div>
         </div>
         <p className="">{comment.body}</p>
@@ -53,7 +51,5 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
     </li>
   );
 };
-
-// todo create delete,edit,reply component
 
 export default CommentCard;

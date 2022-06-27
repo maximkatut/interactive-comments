@@ -39,12 +39,12 @@ const Home: NextPage = () => {
           {comments.data.map((comment) => {
             const replies = repliedComments.data.map((repliedComment) => {
               if (repliedComment.commentId === comment.id) {
-                return <CommentCard key={repliedComment.id} comment={repliedComment} reply />;
+                return <CommentCard key={repliedComment.id} comment={repliedComment} userId={user.data?.id} reply />;
               }
             });
             return (
               <Fragment key={comment.id}>
-                <CommentCard comment={comment} />
+                <CommentCard comment={comment} userId={user.data?.id} />
                 {replies}
               </Fragment>
             );
