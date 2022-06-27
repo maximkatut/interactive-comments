@@ -26,4 +26,32 @@ export const commentsRouter = trpc
         },
       });
     },
+  })
+  .mutation("edit", {
+    input: z.object({
+      id: z.string(),
+      body: z.string().min(5),
+    }),
+    async resolve({ input }) {
+      return await prisma.comment.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          body: input.body,
+        },
+      });
+    },
+  })
+  .mutation("delete", {
+    input: z.object({
+      id: z.string(),
+    }),
+    async resolve({ input }) {
+      return await prisma.comment.delete({
+        where: {
+          id: input.id,
+        },
+      });
+    },
   });
