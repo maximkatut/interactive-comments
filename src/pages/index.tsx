@@ -1,11 +1,13 @@
+import Button from "components/button";
 import CommentCard from "components/commentCard";
 import type { NextPage } from "next";
 import Head from "next/head";
+import Image from "next/image";
 import { Fragment, useRef } from "react";
 import { trpc } from "utils/trpc";
 
 const Home: NextPage = () => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const comments = trpc.useQuery(["comments.get-all"]);
   const repliedComments = trpc.useQuery(["replied-comments.get-all"]);
   //todo query replied comments by original comment id
@@ -35,7 +37,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main className="flex flex-col p-12">
-        <ul className="mb-10 w-[730px] flex flex-col mx-auto items-center">
+        <ul className="mb-2 w-[730px] flex flex-col mx-auto items-center">
           {comments.data.map((comment) => {
             const replies = repliedComments.data.map((repliedComment) => {
               if (repliedComment.commentId === comment.id) {
@@ -50,25 +52,35 @@ const Home: NextPage = () => {
             );
           })}
         </ul>
-        <form
-          onSubmit={(e: any) => {
-            e.preventDefault();
-            if (user.data) {
-              mutate({
-                body: inputRef.current ? inputRef.current.value : "",
-                userId: user.data.id,
-                userName: user.data.name,
-                userAvatar: user.data.avatar,
-              });
-            }
-          }}
-        >
-          <input disabled={isLoading} ref={inputRef} type="text" className="p-1" />
-          {isError && <p>{error.data?.code}</p>}
-          <button disabled={isLoading} className="ml-2 border-2 border-zinc-700 p-1" type="submit">
-            Send
-          </button>
-        </form>
+        <div className="mx-auto w-[730px] p-6 bg-white flex rounded-lg items-start">
+          {user.data && <Image src={user.data.avatar} alt="avatar" width={40} height={40} />}
+          <form
+            className="flex ml-6 w-full"
+            onSubmit={(e: any) => {
+              e.preventDefault();
+              if (user.data) {
+                mutate({
+                  body: inputRef.current ? inputRef.current.value : "",
+                  userId: user.data.id,
+                  userName: user.data.name,
+                  userAvatar: user.data.avatar,
+                });
+              }
+            }}
+          >
+            <textarea
+              placeholder="Add a comment..."
+              className="p-1 w-full rounded-lg border-[1px] hover:border-[rgb(50,65,82)]"
+              disabled={isLoading}
+              ref={inputRef}
+              rows={4}
+            />
+            {isError && <p>{error.data?.code}</p>}
+            <Button styles="self-start ml-4" isLoading={isLoading}>
+              SEND
+            </Button>
+          </form>
+        </div>
       </main>
 
       <footer></footer>
