@@ -1,10 +1,31 @@
 import Image from "next/image";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useRef, useState } from "react";
 import { trpc } from "utils/trpc";
 import Button from "./button";
-import OptionsButton from "./optionsButton";
+import OptionButton from "./optionButton";
 import RateButton from "./rateButton";
 
+import editImg from "../../public/img/icons/icon-edit.svg";
+import deleteImg from "../../public/img/icons/icon-delete.svg";
+import replyImg from "../../public/img/icons/icon-reply.svg";
+
+const OPTION_BUTTONS = {
+  delete: {
+    img: deleteImg,
+    title: "Delete",
+    styles: "text-[rgb(237,100,104)]",
+  },
+  edit: {
+    img: editImg,
+    title: "Edit",
+    styles: "ml-4 text-[rgb(84,87,182)]",
+  },
+  reply: {
+    img: replyImg,
+    title: "Reply",
+    styles: "text-[rgb(84,87,182)]",
+  },
+};
 interface CommentCardProps {
   reply?: boolean;
   userId?: string;
@@ -24,7 +45,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
   const [body, setBody] = useState<string>("akljkfbykauhfsolis");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const client = trpc.useContext();
-  const { mutate } = trpc.useMutation("comments.edit", {
+  const editComment = trpc.useMutation("comments.edit", {
     onSuccess: async () => {
       await client.invalidateQueries(["comments.get-all"]);
       setIsEditMode(false);
@@ -36,16 +57,17 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
     },
   });
 
-  const handleButtonClick = () => {
-    mutate({
+  const handleUpdateButtonClick = () => {
+    editComment.mutate({
       body,
       id: comment.id,
     });
   };
-  const handleReplyClick = () => {};
+  const handleReplyButtonClick = () => {};
 
   const handleEditButtonClick = () => {
     setIsEditMode(true);
+    setBody(comment.body);
   };
 
   const handleDeleteButtonClick = () => {
@@ -77,12 +99,29 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
             <span className="ml-4">{JSON.stringify(comment.createdAt)}</span>
           </div>
           <div className="font-bold">
-            <OptionsButton
-              userId={comment.userId}
-              authUserId={userId}
-              onEditClick={handleEditButtonClick}
-              onDeleteClick={handleDeleteButtonClick}
-            />
+            {comment.userId === userId ? (
+              <>
+                <OptionButton
+                  onClick={handleDeleteButtonClick}
+                  img={OPTION_BUTTONS.delete.img}
+                  title={OPTION_BUTTONS.delete.title}
+                  styles={OPTION_BUTTONS.delete.styles}
+                />
+                <OptionButton
+                  onClick={handleEditButtonClick}
+                  img={OPTION_BUTTONS.edit.img}
+                  title={OPTION_BUTTONS.edit.title}
+                  styles={OPTION_BUTTONS.edit.styles}
+                />
+              </>
+            ) : (
+              <OptionButton
+                onClick={handleReplyButtonClick}
+                img={OPTION_BUTTONS.reply.img}
+                title={OPTION_BUTTONS.reply.title}
+                styles={OPTION_BUTTONS.reply.styles}
+              />
+            )}
           </div>
         </div>
         {isEditMode ? (
@@ -91,12 +130,14 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
               onChange={(e) => {
                 setBody(e.target.value);
               }}
-              className=" py-2 mb-2 px-5 border-[1px] rounded-lg border-[rgb(50,65,82)]"
+              className=" py-2 mb-2 px-5 border-[1px] rounded-lg hover:border-[rgb(50,65,82)]"
               defaultValue={comment.body}
               ref={textAreaRef}
               rows={4}
             />
-            <Button onClick={handleButtonClick}>UPDATE</Button>
+            <Button styles="self-end" onClick={handleUpdateButtonClick}>
+              UPDATE
+            </Button>
           </>
         ) : (
           <p className="">{comment.body}</p>
