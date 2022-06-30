@@ -56,4 +56,20 @@ export const commentsRouter = trpc
         },
       });
     },
+  })
+  .mutation("updateRate", {
+    input: z.object({
+      id: z.string(),
+      rating: z.number(),
+    }),
+    async resolve({ input }) {
+      return await prisma.comment.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          rating: input.rating,
+        },
+      });
+    },
   });

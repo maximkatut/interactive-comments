@@ -39,7 +39,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
   const [isReplyMode, setIsReplyMode] = useState<boolean>(false);
   const [body, setBody] = useState<string>("akljkfbykauhfsolis");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const user = trpc.useQuery(["user.get"]);
+  const { data: user } = trpc.useQuery(["user.get"]);
   const client = trpc.useContext();
   const editComment = trpc.useMutation("comments.edit", {
     onSuccess: async () => {
@@ -88,7 +88,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
           : ""
       }`}
       >
-        <RateButton rating={comment.rating} />
+        <RateButton rating={comment.rating} commentId={comment.id} userId={user?.id} commentUserId={comment.userId} />
         <div className="flex flex-col pl-6 w-full">
           <div className="flex justify-between items-center pb-3">
             <div className="flex items-center">
@@ -96,13 +96,13 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
                 <Image src={comment.userAvatar} alt="avatar" width={32} height={32} />
               </span>
               <span className="text-[rgb(50,65,82)] font-bold ml-4">{comment.userName}</span>
-              {user.data && user.data.id === comment.userId && (
+              {user && user.id === comment.userId && (
                 <span className="ml-1 text-xs py-[0.15rem] px-1 rounded-sm text-white bg-[rgb(84,87,182)]">you</span>
               )}
               <span className="ml-4">{formatDate(comment.createdAt)}</span>
             </div>
             <div className="font-bold">
-              {user.data && comment.userId === user.data.id ? (
+              {user && comment.userId === user.id ? (
                 <>
                   <OptionButton
                     onClick={handleDeleteButtonClick}
@@ -147,12 +147,12 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
           )}
         </div>
       </li>
-      {isReplyMode && user.data && (
+      {isReplyMode && user && (
         <InputForm
           user={{
-            id: user.data.id,
-            name: user.data.name,
-            avatar: user.data.avatar,
+            id: user.id,
+            name: user.name,
+            avatar: user.avatar,
           }}
           repliedCommentId={comment.repliedCommentId || comment.id}
           repliedCommentUserName={comment.userName}
