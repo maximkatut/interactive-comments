@@ -15,6 +15,7 @@ export const commentsRouter = trpc
       userId: z.string(),
       userName: z.string(),
       userAvatar: z.string(),
+      repliedCommentId: z.string().optional(),
     }),
     async resolve({ input }) {
       return await prisma.comment.create({
@@ -23,6 +24,7 @@ export const commentsRouter = trpc
           userId: input.userId,
           userName: input.userName,
           userAvatar: input.userAvatar,
+          repliedCommentId: input.repliedCommentId,
         },
       });
     },

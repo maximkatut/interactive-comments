@@ -8,31 +8,25 @@ import Button from "./button";
 interface InputFormProps {
   user: User;
   reply?: boolean;
-  origCommentId?: string | null;
+  repliedCommentId?: string | null;
   repliedCommentUserName?: string;
   setIsReplyMode?: (x: boolean) => void;
 }
 
-const InputForm: FC<InputFormProps> = ({ user, reply, origCommentId, setIsReplyMode, repliedCommentUserName }) => {
+const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsReplyMode, repliedCommentUserName }) => {
   const [error, setError] = useState<string>("");
   const client = trpc.useContext();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  const trpcOptions = {
+  const { mutate, isLoading, isError } = trpc.useMutation("comments.create", {
     onSuccess: () => {
-      reply ? client.invalidateQueries(["replied-comments.get-all"]) : client.invalidateQueries(["comments.get-all"]);
+      client.invalidateQueries(["comments.get-all"]);
       if (!inputRef.current) return;
       inputRef.current.value = "";
     },
     onError: (data: TRPCClientErrorLike<AppRouter>) => {
       setError(JSON.parse(data.message)[0].message);
     },
-  };
-
-  const createComment = trpc.useMutation("comments.create", trpcOptions);
-  const createReply = trpc.useMutation("replied-comments.create", trpcOptions);
-
-  const create = reply ? createReply : createComment;
+  });
 
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     const data = {
@@ -42,9 +36,9 @@ const InputForm: FC<InputFormProps> = ({ user, reply, origCommentId, setIsReplyM
       userAvatar: user.avatar,
     };
     e.preventDefault();
-    if (user) {
-      reply ? origCommentId && createReply.mutate({ ...data, ...{ origCommentId } }) : createComment.mutate(data);
-    }
+
+    reply ? repliedCommentId && mutate({ ...data, ...{ repliedCommentId } }) : mutate(data);
+
     if (setIsReplyMode) {
       setIsReplyMode(false);
     }
@@ -56,17 +50,17 @@ const InputForm: FC<InputFormProps> = ({ user, reply, origCommentId, setIsReplyM
         <textarea
           placeholder="Add a comment..."
           className="p-1 w-full rounded-lg border-[1px] hover:border-[rgb(50,65,82)]"
-          disabled={create.isLoading}
+          disabled={isLoading}
           ref={inputRef}
           rows={4}
           defaultValue={reply ? `@${repliedCommentUserName}` : ""}
         />
 
-        <Button styles="self-start ml-4" isLoading={create.isLoading}>
+        <Button styles="self-start ml-4" isLoading={isLoading}>
           SEND
         </Button>
       </form>
-      {create.isError && <p className="text-red-500 mt-1 w-full text-center">{error}</p>}
+      {isError && <p className="text-red-500 mt-1 w-full text-center">{error}</p>}
     </>
   );
 };

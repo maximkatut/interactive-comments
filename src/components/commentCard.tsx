@@ -10,7 +10,7 @@ import deleteImg from "../../public/img/icons/icon-delete.svg";
 import replyImg from "../../public/img/icons/icon-reply.svg";
 import { formatDate } from "utils/formatDate";
 import InputForm from "./inputForm";
-import { Comment, RepliedComment } from "@prisma/client";
+import { Comment } from "@prisma/client";
 
 const OPTION_BUTTONS = {
   delete: {
@@ -31,7 +31,7 @@ const OPTION_BUTTONS = {
 };
 interface CommentCardProps {
   reply?: boolean;
-  comment: Comment | RepliedComment;
+  comment: Comment;
 }
 
 const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
@@ -47,31 +47,18 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
       setIsEditMode(false);
     },
   });
-  const editRepliedComment = trpc.useMutation("replied-comments.edit", {
-    onSuccess: async () => {
-      await client.invalidateQueries(["replied-comments.get-all"]);
-      setIsEditMode(false);
-    },
-  });
+
   const deleteComment = trpc.useMutation("comments.delete", {
     onSuccess: () => {
       client.invalidateQueries(["comments.get-all"]);
-      client.invalidateQueries(["replied-comments.get-all"]);
     },
   });
 
   const handleUpdateButtonClick = () => {
-    if (reply) {
-      editRepliedComment.mutate({
-        body,
-        id: comment.id,
-      });
-    } else {
-      editComment.mutate({
-        body,
-        id: comment.id,
-      });
-    }
+    editComment.mutate({
+      body,
+      id: comment.id,
+    });
   };
   const handleReplyButtonClick = () => {
     setIsReplyMode((prevState) => !prevState);
@@ -167,7 +154,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
             name: user.data.name,
             avatar: user.data.avatar,
           }}
-          origCommentId={comment.origCommentId}
+          repliedCommentId={comment.id}
           repliedCommentUserName={comment.userName}
           reply
           setIsReplyMode={setIsReplyMode}

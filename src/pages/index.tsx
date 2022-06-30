@@ -8,16 +8,14 @@ import { trpc } from "utils/trpc";
 
 const Home: NextPage = () => {
   const comments = trpc.useQuery(["comments.get-all"]);
-  const repliedComments = trpc.useQuery(["replied-comments.get-all"]);
-  //todo query replied comments by original comment id
   const user = trpc.useQuery(["user.get"]);
 
-  if (!comments.data || !repliedComments.data) {
+  if (!comments.data) {
     return <div>Loading...</div>;
   }
 
   if (!user.data) {
-    return <div>Please logim</div>;
+    return <div>Please login</div>;
   }
 
   return (
@@ -34,15 +32,18 @@ const Home: NextPage = () => {
       <main className="flex flex-col p-12 mb-20">
         <ul className="mb-2 w-[730px] flex flex-col mx-auto items-center">
           {comments.data.map((comment) => {
-            const replies = repliedComments.data.map((repliedComment) => {
-              if (repliedComment.origCommentId === comment.id) {
-                return <CommentCard key={repliedComment.id} comment={repliedComment} reply />;
-              }
-            });
+            if (comment.repliedCommentId) {
+              return;
+            }
+
             return (
               <Fragment key={comment.id}>
                 <CommentCard comment={comment} />
-                {replies}
+                {comments.data.map((repliedComment) => {
+                  if (comment.id === repliedComment.repliedCommentId) {
+                    return <CommentCard key={repliedComment.id} comment={repliedComment} reply />;
+                  }
+                })}
               </Fragment>
             );
           })}
