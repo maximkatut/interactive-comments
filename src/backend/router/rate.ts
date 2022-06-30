@@ -31,4 +31,16 @@ export const rateRouter = trpc
         },
       });
     },
+  })
+  .mutation("deleteRates", {
+    input: z.object({
+      commentId: z.string(),
+    }),
+    async resolve({ input }) {
+      return await prisma.rate.deleteMany({
+        where: {
+          commentId: input.commentId,
+        },
+      });
+    },
   });

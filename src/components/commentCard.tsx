@@ -41,21 +41,25 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { data: user } = trpc.useQuery(["user.get"]);
   const client = trpc.useContext();
-  const editComment = trpc.useMutation("comments.edit", {
+  const { mutate: deleteRates } = trpc.useMutation("rate.deleteRates");
+  const { mutate: editComment } = trpc.useMutation("comments.edit", {
     onSuccess: async () => {
       await client.invalidateQueries(["comments.get-all"]);
       setIsEditMode(false);
     },
   });
 
-  const deleteComment = trpc.useMutation("comments.delete", {
+  const { mutate: deleteComment } = trpc.useMutation("comments.delete", {
     onSuccess: () => {
       client.invalidateQueries(["comments.get-all"]);
+      deleteRates({
+        commentId: comment.id,
+      });
     },
   });
 
   const handleUpdateButtonClick = () => {
-    editComment.mutate({
+    editComment({
       body,
       id: comment.id,
     });
@@ -70,7 +74,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
   };
 
   const handleDeleteButtonClick = () => {
-    deleteComment.mutate({ id: comment.id });
+    deleteComment({ id: comment.id });
   };
 
   return (

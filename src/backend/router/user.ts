@@ -5,7 +5,7 @@ import { prisma } from "db/client";
 export const userRouter = trpc.router().query("get", {
   async resolve() {
     return await prisma.user.findFirst({
-      where: { name: "ramsesmiron" },
+      where: { name: "juliusomo" },
     });
   },
 });
