@@ -13,36 +13,23 @@ datasource db {
 }
 
 model Comment {
-  id             String           @id @default(cuid())
-  createdAt      DateTime         @default(now())
-  endsAt         DateTime?
-  body           String           @db.VarChar(5000)
-  rating         Int              @default(0)
-  userId         String
-  userName       String
-  userAvatar     String
-  user           User             @relation(fields: [userId, userName, userAvatar], references: [id, name, avatar])
-  RepliedComment RepliedComment[]
-}
-
-model RepliedComment {
-  id         String    @id @default(cuid())
-  createdAt  DateTime  @default(now())
-  endsAt     DateTime?
-  body       String    @db.VarChar(5000)
-  rating     Int       @default(0)
-  userId     String
-  userName   String
-  userAvatar String
-  user       User      @relation(fields: [userId, userName, userAvatar], references: [id, name, avatar])
-  Comment    Comment?  @relation(fields: [commentId], references: [id])
-  commentId  String?
+  id               String    @id @default(cuid())
+  createdAt        DateTime  @default(now())
+  endsAt           DateTime?
+  body             String    @db.VarChar(5000)
+  rating           Int       @default(0)
+  userId           String
+  userName         String
+  userAvatar       String
+  user             User      @relation(fields: [userId, userName, userAvatar], references: [id, name, avatar])
+  reply            Comment?  @relation(name: "Replies", fields: [repliedCommentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies          Comment[] @relation(name: "Replies")
+  repliedCommentId String?
 }
 
 model User {
-  id             String           @id @default(cuid())
-  name           String
-  avatar         String
-  comments       Comment[]
-  RepliedComment RepliedComment[]
+  id       String    @id @default(cuid())
+  name     String
+  avatar   String
+  comments Comment[]
 }
