@@ -32,6 +32,7 @@ const Home: NextPage = () => {
       <main className="flex flex-col p-12 mb-5">
         <ul className="mb-2 w-[730px] flex flex-col mx-auto items-center">
           {comments.data.map((comment) => {
+            // todo redo render of comments
             if (comment.repliedCommentId) {
               return;
             }

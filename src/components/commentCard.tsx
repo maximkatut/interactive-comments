@@ -84,7 +84,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
       bg-white
       ${
         reply
-          ? "relative ml-20 w-[calc(100%-5rem)] before:bg-[rgba(103,114,126,0.2)] before:w-[1px] before:h-[calc(100%+1.5rem)] before:absolute before:-left-10 before:-top-6"
+          ? "relative ml-20 w-[calc(100%-5rem)] before:bg-[rgba(103,114,126,0.2)] before:w-[1px] before:h-[calc(100%+1.1rem)] before:absolute before:-left-10 before:top-[-1.1rem]"
           : ""
       }`}
       >
@@ -154,7 +154,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
             name: user.data.name,
             avatar: user.data.avatar,
           }}
-          repliedCommentId={comment.id}
+          repliedCommentId={comment.repliedCommentId || comment.id}
           repliedCommentUserName={comment.userName}
           reply
           setIsReplyMode={setIsReplyMode}
