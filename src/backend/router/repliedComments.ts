@@ -15,7 +15,7 @@ export const repliedCommentsRouter = trpc
       userId: z.string(),
       userName: z.string(),
       userAvatar: z.string(),
-      commentId: z.string(),
+      origCommentId: z.string(),
     }),
     async resolve({ input }) {
       return await prisma.repliedComment.create({
@@ -24,7 +24,23 @@ export const repliedCommentsRouter = trpc
           userId: input.userId,
           userName: input.userName,
           userAvatar: input.userAvatar,
-          commentId: input.commentId,
+          origCommentId: input.origCommentId,
+        },
+      });
+    },
+  })
+  .mutation("edit", {
+    input: z.object({
+      id: z.string(),
+      body: z.string().min(5),
+    }),
+    async resolve({ input }) {
+      return await prisma.repliedComment.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          body: input.body,
         },
       });
     },

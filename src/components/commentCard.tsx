@@ -9,6 +9,8 @@ import editImg from "../../public/img/icons/icon-edit.svg";
 import deleteImg from "../../public/img/icons/icon-delete.svg";
 import replyImg from "../../public/img/icons/icon-reply.svg";
 import { formatDate } from "utils/formatDate";
+import InputForm from "./inputForm";
+import { Comment, RepliedComment } from "@prisma/client";
 
 const OPTION_BUTTONS = {
   delete: {
@@ -29,23 +31,15 @@ const OPTION_BUTTONS = {
 };
 interface CommentCardProps {
   reply?: boolean;
-  userId?: string;
-  comment: {
-    id: string;
-    body: string;
-    rating: number;
-    createdAt: Date;
-    userName: string;
-    userId: string;
-    userAvatar: string;
-  };
+  comment: Comment | RepliedComment;
 }
 
-const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
+const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isReplyMode, setIsReplyMode] = useState<boolean>(false);
   const [body, setBody] = useState<string>("akljkfbykauhfsolis");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const user = trpc.useQuery(["user.get"]);
   const client = trpc.useContext();
   const editComment = trpc.useMutation("comments.edit", {
     onSuccess: async () => {
@@ -53,20 +47,34 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
       setIsEditMode(false);
     },
   });
+  const editRepliedComment = trpc.useMutation("replied-comments.edit", {
+    onSuccess: async () => {
+      await client.invalidateQueries(["replied-comments.get-all"]);
+      setIsEditMode(false);
+    },
+  });
   const deleteComment = trpc.useMutation("comments.delete", {
     onSuccess: () => {
       client.invalidateQueries(["comments.get-all"]);
+      client.invalidateQueries(["replied-comments.get-all"]);
     },
   });
 
   const handleUpdateButtonClick = () => {
-    editComment.mutate({
-      body,
-      id: comment.id,
-    });
+    if (reply) {
+      editRepliedComment.mutate({
+        body,
+        id: comment.id,
+      });
+    } else {
+      editComment.mutate({
+        body,
+        id: comment.id,
+      });
+    }
   };
   const handleReplyButtonClick = () => {
-    setIsReplyMode(true);
+    setIsReplyMode((prevState) => !prevState);
   };
 
   const handleEditButtonClick = () => {
@@ -101,13 +109,13 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
                 <Image src={comment.userAvatar} alt="avatar" width={32} height={32} />
               </span>
               <span className="text-[rgb(50,65,82)] font-bold ml-4">{comment.userName}</span>
-              {userId === comment.userId && (
+              {user.data && user.data.id === comment.userId && (
                 <span className="ml-1 text-xs py-[0.15rem] px-1 rounded-sm text-white bg-[rgb(84,87,182)]">you</span>
               )}
               <span className="ml-4">{formatDate(comment.createdAt)}</span>
             </div>
             <div className="font-bold">
-              {comment.userId === userId ? (
+              {user.data && comment.userId === user.data.id ? (
                 <>
                   <OptionButton
                     onClick={handleDeleteButtonClick}
@@ -152,7 +160,19 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply, userId }) => {
           )}
         </div>
       </li>
-      {isReplyMode && <form>@{comment.userName}</form>}
+      {isReplyMode && user.data && (
+        <InputForm
+          user={{
+            id: user.data.id,
+            name: user.data.name,
+            avatar: user.data.avatar,
+          }}
+          origCommentId={comment.origCommentId}
+          repliedCommentUserName={comment.userName}
+          reply
+          setIsReplyMode={setIsReplyMode}
+        />
+      )}
     </>
   );
 };
