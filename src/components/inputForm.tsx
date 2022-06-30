@@ -49,10 +49,10 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
       <form className="flex ml-6 w-full" onSubmit={handleFormSubmit}>
         <textarea
           placeholder="Add a comment..."
-          className="p-1 w-full rounded-lg border-[1px] hover:border-[rgb(50,65,82)]"
+          className="p-3 w-full rounded-lg border-[1px] hover:border-[rgb(50,65,82)]"
           disabled={isLoading}
           ref={inputRef}
-          rows={4}
+          rows={3}
           defaultValue={reply ? `@${repliedCommentUserName}` : ""}
         />
 

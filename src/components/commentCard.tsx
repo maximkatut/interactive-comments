@@ -79,7 +79,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
         className={`
       flex
       w-full
-      p-6 my-3
+      p-6 my-[0.55rem]
       rounded-lg
       bg-white
       ${

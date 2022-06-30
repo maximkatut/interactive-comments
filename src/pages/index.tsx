@@ -29,7 +29,7 @@ const Home: NextPage = () => {
         <link rel="manifest" href="/site.webmanifest" />
       </Head>
 
-      <main className="flex flex-col p-12 mb-20">
+      <main className="flex flex-col p-12 mb-5">
         <ul className="mb-2 w-[730px] flex flex-col mx-auto items-center">
           {comments.data.map((comment) => {
             if (comment.repliedCommentId) {
