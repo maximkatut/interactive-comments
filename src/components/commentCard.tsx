@@ -30,7 +30,7 @@ const OPTION_BUTTONS = {
   },
 };
 interface CommentCardProps {
-  reply?: boolean;
+  reply: boolean;
   comment: Comment;
 }
 
@@ -160,7 +160,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
           }}
           repliedCommentId={comment.repliedCommentId || comment.id}
           repliedCommentUserName={comment.userName}
-          reply
+          reply={reply}
           setIsReplyMode={setIsReplyMode}
         />
       )}

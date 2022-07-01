@@ -2,7 +2,6 @@ import CommentCard from "components/commentCard";
 import InputForm from "components/inputForm";
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import { Fragment } from "react";
 import { trpc } from "utils/trpc";
 
@@ -30,16 +29,15 @@ const Home: NextPage = () => {
       </Head>
 
       <main className="flex flex-col p-12 mb-5">
-        <ul className="mb-2 w-[730px] flex flex-col mx-auto items-center">
+        <ul className="w-[730px] flex flex-col mx-auto items-center">
           {comments.data.map((comment) => {
-            // todo redo render of comments
             if (comment.repliedCommentId) {
               return;
             }
 
             return (
               <Fragment key={comment.id}>
-                <CommentCard comment={comment} />
+                <CommentCard comment={comment} reply={false} />
                 {comments.data.map((repliedComment) => {
                   if (comment.id === repliedComment.repliedCommentId) {
                     return <CommentCard key={repliedComment.id} comment={repliedComment} reply />;
@@ -49,14 +47,7 @@ const Home: NextPage = () => {
             );
           })}
         </ul>
-        <div className="mx-auto w-[730px] p-6 bg-white flex rounded-lg items-start">
-          {user.data && (
-            <>
-              <Image src={user.data.avatar} alt="avatar" width={40} height={40} />
-              <InputForm user={user.data} />
-            </>
-          )}
-        </div>
+        {user.data && <InputForm user={user.data} reply={false} />}
       </main>
 
       <footer></footer>
