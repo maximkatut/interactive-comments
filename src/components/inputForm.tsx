@@ -3,7 +3,7 @@ import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "backend/router";
 import { FC, FormEvent, useRef, useState } from "react";
 import { trpc } from "utils/trpc";
-import Button from "./button";
+import Button, { BUTTON_OPTIONS } from "./button";
 import Image from "next/image";
 
 interface InputFormProps {
@@ -64,7 +64,7 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
           defaultValue={reply ? `@${repliedCommentUserName}` : ""}
         />
 
-        <Button styles="self-start ml-4" isLoading={isLoading}>
+        <Button styles={`self-start ml-4 ${BUTTON_OPTIONS.SEND}`} isLoading={isLoading}>
           {setIsReplyMode ? "REPLY" : "SEND"}
         </Button>
       </form>

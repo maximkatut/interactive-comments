@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { FC, useRef, useState } from "react";
 import { trpc } from "utils/trpc";
-import Button from "./button";
+import Button, { BUTTON_OPTIONS } from "./button";
 import OptionButton from "./optionButton";
 import RateButton from "./rateButton";
 
@@ -11,6 +11,7 @@ import replyImg from "../../public/img/icons/icon-reply.svg";
 import { formatDate } from "utils/formatDate";
 import InputForm from "./inputForm";
 import { Comment } from "@prisma/client";
+import { useStore } from "store/imdex";
 
 const OPTION_BUTTONS = {
   delete: {
@@ -35,26 +36,17 @@ interface CommentCardProps {
 }
 
 const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
+  const { setModalIsShowed, setDeletingCommentId } = useStore();
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isReplyMode, setIsReplyMode] = useState<boolean>(false);
   const [body, setBody] = useState<string>("akljkfbykauhfsolis");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { data: user } = trpc.useQuery(["user.get"]);
   const client = trpc.useContext();
-  const { mutate: deleteRates } = trpc.useMutation("rate.deleteRates");
   const { mutate: editComment } = trpc.useMutation("comments.edit", {
     onSuccess: async () => {
       await client.invalidateQueries(["comments.get-all"]);
       setIsEditMode(false);
-    },
-  });
-
-  const { mutate: deleteComment } = trpc.useMutation("comments.delete", {
-    onSuccess: () => {
-      client.invalidateQueries(["comments.get-all"]);
-      deleteRates({
-        commentId: comment.id,
-      });
     },
   });
 
@@ -65,7 +57,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
     });
   };
   const handleReplyButtonClick = () => {
-    setIsReplyMode((prevState) => !prevState);
+    setIsReplyMode(!isReplyMode);
   };
 
   const handleEditButtonClick = () => {
@@ -74,7 +66,8 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
   };
 
   const handleDeleteButtonClick = () => {
-    deleteComment({ id: comment.id });
+    setModalIsShowed(true);
+    setDeletingCommentId(comment.id);
   };
 
   return (
@@ -142,7 +135,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
                 ref={textAreaRef}
                 rows={4}
               />
-              <Button styles="self-end" onClick={handleUpdateButtonClick}>
+              <Button styles={`self-end ${BUTTON_OPTIONS.SEND}`} onClick={handleUpdateButtonClick}>
                 UPDATE
               </Button>
             </>

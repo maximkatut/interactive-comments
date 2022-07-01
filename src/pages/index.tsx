@@ -3,12 +3,14 @@ import InputForm from "components/inputForm";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { Fragment } from "react";
+import Modal from "components/modal";
 import { trpc } from "utils/trpc";
+import { useStore } from "store/imdex";
 
 const Home: NextPage = () => {
   const comments = trpc.useQuery(["comments.get-all"]);
   const user = trpc.useQuery(["user.get"]);
-
+  const { modalIsShowed, deletingCommentId } = useStore();
   if (!comments.data) {
     return <div>Loading...</div>;
   }
@@ -27,8 +29,9 @@ const Home: NextPage = () => {
         <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
       </Head>
-
+      {modalIsShowed && deletingCommentId && <Modal commentId={deletingCommentId} />}
       <main className="flex flex-col p-12 mb-5">
+        <h1 className="visually-hidden">Interactive Comments</h1>
         <ul className="w-[730px] flex flex-col mx-auto items-center">
           {comments.data.map((comment) => {
             if (comment.repliedCommentId) {
