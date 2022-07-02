@@ -37,8 +37,8 @@ const Modal: FC<ModalProps> = ({ commentId }) => {
 
   return (
     <div className="flex justify-center items-center fixed w-screen h-screen overflow-hidden z-10 bg-[rgba(0,0,0,0.5)]">
-      <div className="max-w-[400px] rounded-lg bg-white p-8">
-        <h2 className="font-bold text-2xl mb-4">Delete comment</h2>
+      <div className="max-w-[330px] md:max-w-[400px] rounded-lg bg-white p-6 md:p-8">
+        <h2 className="font-bold text-xl md:text-2xl mb-4">Delete comment</h2>
         <p className="mb-4">
           Are you sure you want to delete this comment? This will remove the comment and can&apos;t be undone.
         </p>

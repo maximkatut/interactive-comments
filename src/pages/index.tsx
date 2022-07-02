@@ -30,9 +30,9 @@ const Home: NextPage = () => {
         <link rel="manifest" href="/site.webmanifest" />
       </Head>
       {modalIsShowed && deletingCommentId && <Modal commentId={deletingCommentId} />}
-      <main className="flex flex-col p-12 mb-5">
+      <main className="flex flex-col p-4 md:p-12 mb-5">
         <h1 className="visually-hidden">Interactive Comments</h1>
-        <ul className="w-[730px] flex flex-col mx-auto items-center">
+        <ul className="md:w-[730px] flex flex-col mx-auto items-center">
           {comments.data.map((comment) => {
             if (comment.repliedCommentId) {
               return;

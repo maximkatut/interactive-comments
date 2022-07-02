@@ -10,13 +10,11 @@ interface OptionButtonProps {
 
 const OptionButton: FC<OptionButtonProps> = ({ styles, onClick, img, title }) => {
   return (
-    <>
-      <span className={`${styles} hover:opacity-50`}>
-        <button onClick={onClick}>
-          <Image src={img} alt={`${title} button`} width={12} height={12} /> {title}
-        </button>
-      </span>
-    </>
+    <span className={`${styles} hover:opacity-50 absolute bottom-6 md:static`}>
+      <button onClick={onClick}>
+        <Image src={img} alt={`${title} button`} width={12} height={12} /> {title}
+      </button>
+    </span>
   );
 };
 

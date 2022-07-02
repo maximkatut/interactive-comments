@@ -54,20 +54,24 @@ const RateButton: FC<RateButtonProps> = ({ rating, commentId, userId, commentUse
   };
 
   return (
-    <div>
-      <div className="bg-[rgb(245,246,250)] relative flex flex-col items-center justify-between px-4 py-2 rounded-xl h-24">
+    <div className="md:order-none order-1 mt-4 md:mt-0">
+      <div className="bg-[rgb(245,246,250)] relative flex md:flex-col items-center justify-between px-3 md:px-4 py-2 rounded-xl md:h-24 w-24 md:w-auto">
         <button
           onClick={handlePlusRateClick}
-          className={`opacity-50 ${commentUserId === userId || !!rate ? "" : "hover:opacity-100"}`}
+          className={`w-[0.65rem] md:w-auto opacity-50 ${
+            commentUserId === userId || !!rate ? "" : "hover:opacity-100"
+          }`}
           disabled={isLoading || commentUserId === userId || !!rate}
         >
           <Image src={iconPlus} alt="plus" width={14} height={14} />
         </button>
-        <span className="text-[rgb(84,87,182)] font-bold absolute top-[2.35rem]">{rating}</span>
+        <span className="text-[rgb(84,87,182)] font-bold md:absolute top-[2.35rem]">{rating}</span>
         <button
           onClick={handleMinusRateClick}
           disabled={isLoading || commentUserId === userId || !!rate}
-          className={`opacity-50 ${commentUserId === userId || !!rate ? "" : "hover:opacity-100"}`}
+          className={`w-[0.65rem] mb-1 md:mb-0 md:w-auto opacity-50 ${
+            commentUserId === userId || !!rate ? "" : "hover:opacity-100"
+          }`}
         >
           <Image src={iconMinus} alt="minus" width={14} height={3} />
         </button>

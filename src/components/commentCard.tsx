@@ -12,22 +12,24 @@ import { formatDate } from "utils/formatDate";
 import InputForm from "./inputForm";
 import { Comment } from "@prisma/client";
 import { useStore } from "store/imdex";
+import { TRPCClientErrorLike } from "@trpc/client";
+import { AppRouter } from "backend/router";
 
 const OPTION_BUTTONS = {
   delete: {
     img: deleteImg,
     title: "Delete",
-    styles: "text-[rgb(237,100,104)]",
+    styles: "text-[rgb(237,100,104)] right-20",
   },
   edit: {
     img: editImg,
     title: "Edit",
-    styles: "ml-4 text-[rgb(84,87,182)]",
+    styles: "ml-4 text-[rgb(84,87,182)] right-6",
   },
   reply: {
     img: replyImg,
     title: "Reply",
-    styles: "text-[rgb(84,87,182)]",
+    styles: "text-[rgb(84,87,182)] right-6",
   },
 };
 interface CommentCardProps {
@@ -37,18 +39,28 @@ interface CommentCardProps {
 
 const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
   const { setModalIsShowed, setDeletingCommentId } = useStore();
+  const [error, setError] = useState<string>("");
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isReplyMode, setIsReplyMode] = useState<boolean>(false);
   const [body, setBody] = useState<string>("akljkfbykauhfsolis");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { data: user } = trpc.useQuery(["user.get"]);
   const client = trpc.useContext();
-  const { mutate: editComment } = trpc.useMutation("comments.edit", {
+  const {
+    mutate: editComment,
+    isError,
+    isLoading,
+    error: error2,
+  } = trpc.useMutation("comments.edit", {
     onSuccess: async () => {
       await client.invalidateQueries(["comments.get-all"]);
       setIsEditMode(false);
     },
+    onError: (data: TRPCClientErrorLike<AppRouter>) => {
+      setError(JSON.parse(data.message)[0].message);
+    },
   });
+  console.log(error2);
 
   const handleUpdateButtonClick = () => {
     editComment({
@@ -75,19 +87,23 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
       <li
         className={`
       flex
+      md:flex-row
+      flex-col
+      p-4
       w-full
-      p-6 my-[0.55rem]
+      md:p-6 my-[0.55rem]
       rounded-lg
       bg-white
+      relative
       ${
         reply
-          ? "relative ml-20 w-[calc(100%-5rem)] before:bg-[rgba(103,114,126,0.2)] before:w-[1px] before:h-[calc(100%+1.1rem)] before:absolute before:-left-10 before:top-[-1.1rem]"
+          ? "relative ml-4 w-[calc(100%-1rem)] md:ml-20 md:w-[calc(100%-5rem)] before:bg-[rgba(103,114,126,0.2)] before:w-[1px] before:h-[calc(100%+1.1rem)] before:absolute before:-left-4 md:before:-left-10 before:top-[-1.1rem]"
           : ""
       }`}
       >
         <RateButton rating={comment.rating} commentId={comment.id} userId={user?.id} commentUserId={comment.userId} />
-        <div className="flex flex-col pl-6 w-full">
-          <div className="flex justify-between items-center pb-3">
+        <div className="flex flex-col pl-0 md:pl-6 w-full">
+          <div className=" flex justify-between items-center pb-3">
             <div className="flex items-center">
               <span>
                 <Image src={comment.userAvatar} alt="avatar" width={32} height={32} />
@@ -130,14 +146,19 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
                 onChange={(e) => {
                   setBody(e.target.value);
                 }}
-                className=" py-2 mb-2 px-5 border-[1px] rounded-lg hover:border-[rgb(50,65,82)]"
+                className="py-2 mb-2 px-5 border-[1px] rounded-lg hover:border-[rgb(50,65,82)]"
                 defaultValue={comment.body}
                 ref={textAreaRef}
                 rows={4}
               />
-              <Button styles={`self-end ${BUTTON_OPTIONS.SEND}`} onClick={handleUpdateButtonClick}>
+              <Button
+                styles={`self-end ${BUTTON_OPTIONS.SEND}`}
+                onClick={handleUpdateButtonClick}
+                isLoading={isLoading}
+              >
                 UPDATE
               </Button>
+              {isError && <p className="absolute -bottom-60 left-0 text-red-500 mt-1 w-full text-center">{error}</p>}
             </>
           ) : (
             <p className="">{comment.body}</p>
