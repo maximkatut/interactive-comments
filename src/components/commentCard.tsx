@@ -174,7 +174,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
           }}
           repliedCommentId={comment.repliedCommentId || comment.id}
           repliedCommentUserName={comment.userName}
-          reply={reply}
+          reply={true}
           setIsReplyMode={setIsReplyMode}
         />
       )}
