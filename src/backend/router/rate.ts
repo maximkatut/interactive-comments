@@ -22,12 +22,30 @@ export const rateRouter = trpc
     input: z.object({
       commentId: z.string(),
       userId: z.string(),
+      status: z.number(),
     }),
     async resolve({ input }) {
       return await prisma.rate.create({
         data: {
           commentId: input.commentId,
           userId: input.userId,
+          status: input.status,
+        },
+      });
+    },
+  })
+  .mutation("edit", {
+    input: z.object({
+      rateId: z.number(),
+      status: z.number(),
+    }),
+    async resolve({ input }) {
+      return await prisma.rate.update({
+        where: {
+          id: input.rateId,
+        },
+        data: {
+          status: input.status,
         },
       });
     },

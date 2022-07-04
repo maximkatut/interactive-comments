@@ -57,7 +57,7 @@ export const commentsRouter = trpc
       });
     },
   })
-  .mutation("updateRate", {
+  .mutation("updateRating", {
     input: z.object({
       id: z.string(),
       rating: z.number(),

@@ -34,12 +34,15 @@ model User {
   avatar   String
   comments Comment[]
   Rate     Rate[]
+
+  @@unique([id, name, avatar])
 }
 
 model Rate {
   id        Int     @id @default(autoincrement())
   userId    String
   commentId String
+  status    Int     @default(0)
   user      User    @relation(fields: [userId], references: [id])
   comment   Comment @relation(fields: [commentId], references: [id])
 }

@@ -1,6 +1,6 @@
 import { Rate } from "@prisma/client";
 import Image from "next/image";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { trpc } from "utils/trpc";
 import iconMinus from "../../public/img/icons/icon-minus.svg";
 import iconPlus from "../../public/img/icons/icon-plus.svg";
@@ -9,48 +9,86 @@ interface RateButtonProps {
   rating: number;
   commentId: string;
   commentUserId: string;
-  userId?: string;
+  userId: string;
 }
 
 const RateButton: FC<RateButtonProps> = ({ rating, commentId, userId, commentUserId }) => {
-  const client = trpc.useContext();
-  const { mutate: createRate, isLoading } = trpc.useMutation("rate.create");
-  const { mutate: updateRate } = trpc.useMutation("comments.updateRate", {
-    onSuccess: () => {
-      client.invalidateQueries(["comments.get-all"]);
-      client.invalidateQueries(["rate.get"]);
-    },
-  });
-  let rate: Rate | null | undefined;
-  if (userId) {
-    rate = trpc.useQuery(["rate.get", { userId, commentId }]).data;
-  }
+  const [rate, setRate] = useState<Rate>();
+  const [status, setStatus] = useState<number>(0);
+  const [newRating, setNewRating] = useState<number>(rating);
+  const initialRate = trpc.useQuery(["rate.get", { userId, commentId }]).data;
+  const { mutate: createRate } = trpc.useMutation("rate.create");
+  const { mutate: editRate } = trpc.useMutation("rate.edit");
+  const { mutate: updateRating } = trpc.useMutation("comments.updateRating");
 
-  const createRateAndUpdateRating = (newRating: number) => {
-    if (!userId) {
-      return;
+  useEffect(() => {
+    if (initialRate) {
+      setRate(initialRate);
+      setStatus(initialRate.status);
     }
+  }, [initialRate]);
+
+  const createOrUpdateRate = (status: number) => {
     if (rate) {
-      return;
+      editRate({
+        status,
+        rateId: rate.id,
+      });
+    } else {
+      createRate({
+        commentId,
+        userId,
+        status,
+      });
     }
-    createRate({
-      userId,
-      commentId,
-    });
-    updateRate({
-      id: commentId,
-      rating: newRating,
-    });
   };
 
   const handleMinusRateClick = () => {
-    const newRating = rating - 1;
-    createRateAndUpdateRating(newRating);
+    if (status === 1) {
+      setStatus(0);
+      createOrUpdateRate(0);
+      setNewRating((prevRating) => {
+        updateRating({
+          id: commentId,
+          rating: prevRating - 1,
+        });
+        return prevRating - 1;
+      });
+    } else {
+      setStatus(-1);
+      createOrUpdateRate(-1);
+      setNewRating((prevRating) => {
+        updateRating({
+          id: commentId,
+          rating: status === 0 ? prevRating - 1 : prevRating,
+        });
+        return status === 0 ? prevRating - 1 : prevRating;
+      });
+    }
   };
 
   const handlePlusRateClick = () => {
-    const newRating = rating + 1;
-    createRateAndUpdateRating(newRating);
+    if (status === -1) {
+      setStatus(0);
+      createOrUpdateRate(0);
+      setNewRating((prevRating) => {
+        updateRating({
+          id: commentId,
+          rating: prevRating + 1,
+        });
+        return prevRating + 1;
+      });
+    } else {
+      setStatus(1);
+      createOrUpdateRate(1);
+      setNewRating((prevRating) => {
+        updateRating({
+          id: commentId,
+          rating: status === 0 ? prevRating + 1 : prevRating,
+        });
+        return status === 0 ? prevRating + 1 : prevRating;
+      });
+    }
   };
 
   return (
@@ -59,18 +97,18 @@ const RateButton: FC<RateButtonProps> = ({ rating, commentId, userId, commentUse
         <button
           onClick={handlePlusRateClick}
           className={`w-[0.65rem] md:w-auto opacity-50 ${
-            commentUserId === userId || !!rate ? "" : "hover:opacity-100"
+            commentUserId === userId || status === 1 ? "" : "hover:opacity-100"
           }`}
-          disabled={isLoading || commentUserId === userId || !!rate}
+          disabled={commentUserId === userId || status === 1}
         >
           <Image src={iconPlus} alt="plus" width={14} height={14} />
         </button>
-        <span className="text-[rgb(84,87,182)] font-bold md:absolute top-[2.35rem]">{rating}</span>
+        <span className="text-[rgb(84,87,182)] font-bold md:absolute top-[2.35rem]">{newRating}</span>
         <button
           onClick={handleMinusRateClick}
-          disabled={isLoading || commentUserId === userId || !!rate}
+          disabled={commentUserId === userId || status === -1}
           className={`w-[0.65rem] mb-1 md:mb-0 md:w-auto opacity-50 ${
-            commentUserId === userId || !!rate ? "" : "hover:opacity-100"
+            commentUserId === userId || status === -1 ? "" : "hover:opacity-100"
           }`}
         >
           <Image src={iconMinus} alt="minus" width={14} height={3} />

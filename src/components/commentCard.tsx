@@ -50,7 +50,6 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
     mutate: editComment,
     isError,
     isLoading,
-    error: error2,
   } = trpc.useMutation("comments.edit", {
     onSuccess: async () => {
       await client.invalidateQueries(["comments.get-all"]);
@@ -60,7 +59,6 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
       setError(JSON.parse(data.message)[0].message);
     },
   });
-  console.log(error2);
 
   const handleUpdateButtonClick = () => {
     editComment({
@@ -82,6 +80,10 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
     setDeletingCommentId(comment.id);
   };
 
+  if (!user) {
+    return <p>Please login...</p>;
+  }
+
   return (
     <>
       <li
@@ -101,7 +103,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
           : ""
       }`}
       >
-        <RateButton rating={comment.rating} commentId={comment.id} userId={user?.id} commentUserId={comment.userId} />
+        <RateButton rating={comment.rating} commentId={comment.id} userId={user.id} commentUserId={comment.userId} />
         <div className="flex flex-col pl-0 md:pl-6 w-full">
           <div className=" flex justify-between items-center pb-3">
             <div className="flex items-center">
