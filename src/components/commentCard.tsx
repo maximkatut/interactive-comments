@@ -11,7 +11,7 @@ import replyImg from "../../public/img/icons/icon-reply.svg";
 import { formatDate } from "utils/formatDate";
 import InputForm from "./inputForm";
 import { Comment } from "@prisma/client";
-import { useStore } from "store/imdex";
+import { useStore } from "store";
 import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "backend/router";
 

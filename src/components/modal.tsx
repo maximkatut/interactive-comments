@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { useStore } from "store/imdex";
+import { useStore } from "store";
 import { trpc } from "utils/trpc";
 import Button, { BUTTON_OPTIONS } from "./button";
 

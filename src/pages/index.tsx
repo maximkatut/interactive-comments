@@ -5,14 +5,22 @@ import Head from "next/head";
 import { Fragment } from "react";
 import Modal from "components/modal";
 import { trpc } from "utils/trpc";
-import { useStore } from "store/imdex";
+import { useStore } from "store";
+import Image from "next/image";
+import spinner from "../../public/img/icons/spinner.svg";
 
 const Home: NextPage = () => {
   const comments = trpc.useQuery(["comments.get-all"]);
   const user = trpc.useQuery(["user.get"]);
   const { modalIsShowed, deletingCommentId } = useStore();
   if (!comments.data) {
-    return <div>Loading...</div>;
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <span className="animate-spin opacity-60">
+          <Image src={spinner} alt="spinner" width={36} height={36} />
+        </span>
+      </div>
+    );
   }
 
   if (!user.data) {
@@ -20,7 +28,7 @@ const Home: NextPage = () => {
   }
 
   return (
-    <div>
+    <div className="relative">
       <Head>
         <title>Comments</title>
         <meta name="description" content="Interactive comments on NextJS" />
@@ -37,7 +45,6 @@ const Home: NextPage = () => {
             if (comment.repliedCommentId) {
               return;
             }
-
             return (
               <Fragment key={comment.id}>
                 <CommentCard comment={comment} reply={false} />
