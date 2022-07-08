@@ -3,9 +3,12 @@ import { z } from "zod";
 import { prisma } from "db/client";
 
 export const userRouter = trpc.router().query("get", {
-  async resolve() {
+  input: z.object({
+    userId: z.string(),
+  }),
+  async resolve({ input }) {
     return await prisma.user.findFirst({
-      where: { name: "juliusomo" },
+      where: { id: input.userId },
     });
   },
 });

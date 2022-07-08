@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { FC, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import { trpc } from "utils/trpc";
 import Button, { BUTTON_OPTIONS } from "./button";
 import OptionButton from "./optionButton";
@@ -38,13 +39,14 @@ interface CommentCardProps {
 }
 
 const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
+  const { data: session } = useSession();
   const { setModalIsShowed, setDeletingCommentId } = useStore();
   const [error, setError] = useState<string>("");
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isReplyMode, setIsReplyMode] = useState<boolean>(false);
   const [body, setBody] = useState<string>("akljkfbykauhfsolis");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const { data: user } = trpc.useQuery(["user.get"]);
+  const { data: user } = trpc.useQuery(["user.get", { userId: session?.userId as string }]);
   const client = trpc.useContext();
   const {
     mutate: editComment,
@@ -108,7 +110,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
           <div className=" flex justify-between items-center pb-3">
             <div className="flex items-center">
               <span>
-                <Image src={comment.userAvatar} alt="avatar" width={32} height={32} />
+                <Image className="rounded-full" src={comment.userAvatar} alt="avatar" width={32} height={32} />
               </span>
               <span className="text-[rgb(50,65,82)] font-bold ml-4">{comment.userName}</span>
               {user && user.id === comment.userId && (
@@ -169,11 +171,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
       </li>
       {isReplyMode && user && (
         <InputForm
-          user={{
-            id: user.id,
-            name: user.name,
-            avatar: user.avatar,
-          }}
+          user={user}
           repliedCommentId={comment.repliedCommentId || comment.id}
           repliedCommentUserName={comment.userName}
           reply={true}

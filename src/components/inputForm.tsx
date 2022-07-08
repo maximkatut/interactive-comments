@@ -18,7 +18,11 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
   const [error, setError] = useState<string>("");
   const client = trpc.useContext();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { mutate, isLoading, isError } = trpc.useMutation("comments.create", {
+  const {
+    mutate: createComment,
+    isLoading,
+    isError,
+  } = trpc.useMutation("comments.create", {
     onSuccess: () => {
       client.invalidateQueries(["comments.get-all"]);
       if (!inputRef.current) return;
@@ -34,11 +38,11 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
       body: inputRef.current ? inputRef.current.value : "",
       userId: user.id,
       userName: user.name,
-      userAvatar: user.avatar,
+      userAvatar: user.avatar || (user.image as string),
     };
     e.preventDefault();
 
-    reply ? repliedCommentId && mutate({ ...data, ...{ repliedCommentId } }) : mutate(data);
+    reply ? repliedCommentId && createComment({ ...data, ...{ repliedCommentId } }) : createComment(data);
 
     if (setIsReplyMode) {
       setIsReplyMode(false);
@@ -53,7 +57,15 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
           : "md:w-[730px] my-[0.55rem]"
       }`}
     >
-      <Image src={user.avatar} alt="avatar" width={40} height={40} />
+      {user.avatar && (
+        <Image
+          className="rounded-full"
+          src={user.avatar || (user.image as string)}
+          alt="avatar"
+          width={40}
+          height={40}
+        />
+      )}
       <form className={`flex flex-wrap md:flex-nowrap ml-6 w-full`} onSubmit={handleFormSubmit}>
         <textarea
           placeholder="Add a comment..."
