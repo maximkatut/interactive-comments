@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { FC, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import { Comment } from "@prisma/client";
+import { TRPCClientErrorLike } from "@trpc/client";
 import { trpc } from "utils/trpc";
 import Button, { BUTTON_OPTIONS } from "./button";
 import OptionButton from "./optionButton";
@@ -10,11 +12,10 @@ import editImg from "../../public/img/icons/icon-edit.svg";
 import deleteImg from "../../public/img/icons/icon-delete.svg";
 import replyImg from "../../public/img/icons/icon-reply.svg";
 import { formatDate } from "utils/formatDate";
+
 import InputForm from "./inputForm";
-import { Comment } from "@prisma/client";
 import { useStore } from "store";
-import { TRPCClientErrorLike } from "@trpc/client";
-import { AppRouter } from "backend/router";
+import type { AppRouter } from "backend/router";
 
 const OPTION_BUTTONS = {
   delete: {
@@ -46,7 +47,9 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
   const [isReplyMode, setIsReplyMode] = useState<boolean>(false);
   const [body, setBody] = useState<string>("akljkfbykauhfsolis");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const { data: user } = trpc.useQuery(["user.get", { userId: session?.userId as string }]);
+  const { data: user } = !!session
+    ? trpc.useQuery(["user.getById", { userId: session?.userId as string }])
+    : trpc.useQuery(["user.getByName", { name: "Guest" }]);
   const client = trpc.useContext();
   const {
     mutate: editComment,
@@ -82,10 +85,6 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
     setDeletingCommentId(comment.id);
   };
 
-  if (!user) {
-    return <p>Please login...</p>;
-  }
-
   return (
     <>
       <li
@@ -105,7 +104,9 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
           : ""
       }`}
       >
-        <RateButton rating={comment.rating} commentId={comment.id} userId={user.id} commentUserId={comment.userId} />
+        {user && (
+          <RateButton rating={comment.rating} commentId={comment.id} userId={user.id} commentUserId={comment.userId} />
+        )}
         <div className="flex flex-col pl-0 md:pl-6 w-full">
           <div className=" flex justify-between items-center pb-3">
             <div className="flex items-center">
@@ -174,7 +175,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
           user={user}
           repliedCommentId={comment.repliedCommentId || comment.id}
           repliedCommentUserName={comment.userName}
-          reply={true}
+          reply={!!comment.repliedCommentId}
           setIsReplyMode={setIsReplyMode}
         />
       )}

@@ -1,10 +1,11 @@
 import { User } from "@prisma/client";
 import { TRPCClientErrorLike } from "@trpc/client";
-import { AppRouter } from "backend/router";
 import { FC, FormEvent, useRef, useState } from "react";
+import Image from "next/image";
+
+import { AppRouter } from "backend/router";
 import { trpc } from "utils/trpc";
 import Button, { BUTTON_OPTIONS } from "./button";
-import Image from "next/image";
 
 interface InputFormProps {
   user: User;

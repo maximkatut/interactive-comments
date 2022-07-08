@@ -17,7 +17,9 @@ import spinner from "../../public/img/icons/spinner.svg";
 const Home: NextPage = () => {
   const { data: session } = useSession();
   const comments = trpc.useQuery(["comments.get-all"]);
-  const user = trpc.useQuery(["user.get", { userId: session?.userId as string }]);
+  const { data: user } = !!session
+    ? trpc.useQuery(["user.getById", { userId: session?.userId as string }])
+    : trpc.useQuery(["user.getByName", { name: "Guest" }]);
   const { modalIsShowed, deletingCommentId } = useStore();
 
   if (!comments.data) {
@@ -30,7 +32,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="relative">
-      <header className="w-[730px] mx-auto p-2 px-10 bg-[#ffffff] rounded-b-lg flex items-center justify-between">
+      <header className="md:w-[730px] mx-auto p-2 px-10 bg-white rounded-b-lg flex items-center justify-between">
         {session ? (
           <div className="flex items-center">
             {session.user?.image && (
@@ -39,7 +41,7 @@ const Home: NextPage = () => {
             <p className="ml-3 font-bold">Hello, {session.user?.name}!</p>
           </div>
         ) : (
-          <p className="font-bold">Hi! Please, sign in to leave a comment.</p>
+          <p className="font-bold">Hi! Please, sign in to leave a comment or you can be a GUEST.</p>
         )}
         <Button
           onClick={() => {
@@ -78,7 +80,7 @@ const Home: NextPage = () => {
             );
           })}
         </ul>
-        {user.data && <InputForm user={user.data} reply={false} />}
+        {user && <InputForm user={user} reply={false} />}
       </main>
       <footer></footer>
     </div>
