@@ -1,34 +1,55 @@
-import CommentCard from "components/commentCard";
-import InputForm from "components/inputForm";
-import type { NextPage } from "next";
 import Head from "next/head";
 import { Fragment } from "react";
+import Image from "next/image";
+import type { NextPage } from "next";
+import { useSession, signIn, signOut } from "next-auth/react";
+
+import CommentCard from "components/commentCard";
+import InputForm from "components/inputForm";
 import Modal from "components/modal";
+import Button, { BUTTON_OPTIONS } from "components/button";
+
 import { trpc } from "utils/trpc";
 import { useStore } from "store";
-import Image from "next/image";
+
 import spinner from "../../public/img/icons/spinner.svg";
 
 const Home: NextPage = () => {
+  const { data: session } = useSession();
   const comments = trpc.useQuery(["comments.get-all"]);
-  const user = trpc.useQuery(["user.get"]);
+  const user = trpc.useQuery(["user.get", { userId: session?.userId as string }]);
   const { modalIsShowed, deletingCommentId } = useStore();
+
   if (!comments.data) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <span className="animate-spin opacity-60">
-          <Image src={spinner} alt="spinner" width={36} height={36} />
-        </span>
+        <Image src={spinner} alt="spinner" width={36} height={36} />
       </div>
     );
   }
 
-  if (!user.data) {
-    return <div>Please login</div>;
-  }
-
   return (
     <div className="relative">
+      <header className="w-[730px] mx-auto p-2 px-10 bg-[#ffffff] rounded-b-lg flex items-center justify-between">
+        {session ? (
+          <div className="flex items-center">
+            {session.user?.image && (
+              <Image className="rounded-full" src={session.user.image} width={32} height={32} alt="Profile image" />
+            )}
+            <p className="ml-3 font-bold">Hello, {session.user?.name}!</p>
+          </div>
+        ) : (
+          <p className="font-bold">Hi! Please, sign in to leave a comment.</p>
+        )}
+        <Button
+          onClick={() => {
+            session ? signOut() : signIn();
+          }}
+          styles={BUTTON_OPTIONS.LOGIN}
+        >
+          {session ? "Log out" : "Sign in"}
+        </Button>
+      </header>
       <Head>
         <title>Comments</title>
         <meta name="description" content="Interactive comments on NextJS" />
@@ -59,7 +80,6 @@ const Home: NextPage = () => {
         </ul>
         {user.data && <InputForm user={user.data} reply={false} />}
       </main>
-
       <footer></footer>
     </div>
   );
