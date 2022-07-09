@@ -25,6 +25,7 @@ model Comment {
   reply            Comment?  @relation(name: "Replies", fields: [repliedCommentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   replies          Comment[] @relation(name: "Replies")
   repliedCommentId String?
+  repliedUserName  String?
   Rate             Rate[]
 }
 

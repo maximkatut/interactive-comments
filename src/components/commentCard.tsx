@@ -16,6 +16,7 @@ import { formatDate } from "utils/formatDate";
 import InputForm from "./inputForm";
 import { useStore } from "store";
 import type { AppRouter } from "backend/router";
+import Highlight from "./highlight";
 
 const OPTION_BUTTONS = {
   delete: {
@@ -45,7 +46,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
   const [error, setError] = useState<string>("");
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isReplyMode, setIsReplyMode] = useState<boolean>(false);
-  const [body, setBody] = useState<string>("akljkfbykauhfsolis");
+  const [body, setBody] = useState<string>("");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { data: user } = !!session
     ? trpc.useQuery(["user.getById", { userId: session?.userId as string }])
@@ -166,7 +167,7 @@ const CommentCard: FC<CommentCardProps> = ({ comment, reply }) => {
               {isError && <p className="absolute -bottom-60 left-0 text-red-500 mt-1 w-full text-center">{error}</p>}
             </>
           ) : (
-            <p className="">{comment.body}</p>
+            <Highlight comment={comment.body} userName={comment.repliedUserName as string} />
           )}
         </div>
       </li>

@@ -10,6 +10,6 @@ interface State {
 export const useStore = create<State>((set) => ({
   modalIsShowed: false,
   deletingCommentId: null,
-  setModalIsShowed: (bool: boolean) => set(() => ({ modalIsShowed: bool })),
+  setModalIsShowed: (bool) => set(() => ({ modalIsShowed: bool })),
   setDeletingCommentId: (commentId) => set(() => ({ deletingCommentId: commentId })),
 }));

@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import { TRPCClientErrorLike } from "@trpc/client";
-import { FC, FormEvent, useRef, useState } from "react";
+import { FC, FormEvent, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import { AppRouter } from "backend/router";
@@ -34,6 +34,10 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
     },
   });
 
+  useEffect(() => {
+    !!repliedCommentId && inputRef.current?.focus();
+  }, [inputRef, repliedCommentId]);
+
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     const data = {
       body: inputRef.current ? inputRef.current.value : "",
@@ -43,7 +47,9 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
     };
     e.preventDefault();
 
-    reply ? repliedCommentId && createComment({ ...data, ...{ repliedCommentId } }) : createComment(data);
+    !!repliedCommentId
+      ? repliedCommentId && createComment({ ...data, ...{ repliedCommentId, repliedUserName: repliedCommentUserName } })
+      : createComment(data);
 
     if (setIsReplyMode) {
       setIsReplyMode(false);
@@ -74,7 +80,7 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
           disabled={isLoading}
           ref={inputRef}
           rows={3}
-          defaultValue={setIsReplyMode ? `@${repliedCommentUserName}` : ""}
+          defaultValue={setIsReplyMode ? `@${repliedCommentUserName}, ` : ""}
         />
 
         <Button styles={`ml-auto md:ml-4 self-start ${BUTTON_OPTIONS.SEND}`} isLoading={isLoading}>
