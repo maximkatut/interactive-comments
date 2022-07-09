@@ -73,7 +73,15 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
           height={40}
         />
       )}
-      <form className={`flex flex-wrap md:flex-nowrap ml-6 w-full`} onSubmit={handleFormSubmit}>
+      <form
+        className={`flex flex-wrap md:flex-nowrap ml-6 w-full`}
+        onSubmit={handleFormSubmit}
+        onKeyDown={(e) => {
+          if ((e.ctrlKey === true || e.metaKey === true) && e.code === "Enter") {
+            handleFormSubmit(e);
+          }
+        }}
+      >
         <textarea
           onFocus={(e) => {
             e.target.selectionStart = e.target.selectionEnd = e.target.value.length;
