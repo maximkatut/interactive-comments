@@ -9,9 +9,13 @@ const Highlight = ({ comment, userName }: HighlightProps) => {
   if (commentArray.length > 1) {
     return (
       <p>
-        {commentArray.map((item) => {
+        {commentArray.map((item, index) => {
           if (item === userName) {
-            return <span className="font-bold text-[rgb(84,87,182)]">@{item}</span>;
+            return (
+              <span key={index} className="font-bold text-[rgb(84,87,182)]">
+                @{item}
+              </span>
+            );
           }
           return item;
         })}

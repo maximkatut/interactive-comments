@@ -75,6 +75,9 @@ const InputForm: FC<InputFormProps> = ({ user, reply, repliedCommentId, setIsRep
       )}
       <form className={`flex flex-wrap md:flex-nowrap ml-6 w-full`} onSubmit={handleFormSubmit}>
         <textarea
+          onFocus={(e) => {
+            e.target.selectionStart = e.target.selectionEnd = e.target.value.length;
+          }}
           placeholder="Add a comment..."
           className="mb-3 md:mb-0 p-3 w-full rounded-lg border-[1px] hover:border-[rgb(50,65,82)]"
           disabled={isLoading}
